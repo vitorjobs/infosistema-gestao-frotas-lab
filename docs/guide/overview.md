@@ -1,29 +1,24 @@
 # Visão geral
 
-Backend NestJS para **gestão de frota**: CRUD de marcas, modelos e veículos, consulta de usuários, autenticação JWT e observabilidade integrada.
+Backend NestJS para **gestão de frota** (Aivacol): CRUD de marcas, modelos e veículos, autenticação JWT, cache, observabilidade e auditoria opcional.
 
 ## Problema que resolve
 
-Centralizar o cadastro e a consulta de veículos de frota com regras de integridade (unicidade, vínculos entre entidades), cache de listagens e rastreabilidade opcional de requisições HTTP.
+Centralizar cadastro e consulta de veículos com regras de integridade, cache de listagens e rastreabilidade HTTP opcional.
 
-## Prefixo da API
+## Em uma frase
 
-Todas as rotas HTTP usam o prefixo **`/api`**.
+API REST com prefixo **`/api`**, protegida por JWT, persistida em SQL Server e instrumentada para Prometheus/Grafana.
 
-## Estrutura principal (`src/`)
+## Arquitetura
 
-| Módulo | Função |
-|---|---|
-| `auth` | Login JWT e guards |
-| `users` | Consulta de usuários |
-| `brands`, `models`, `vehicles` | CRUD de frota |
-| `cache` | Redis ou memória |
-| `audit` | Logs HTTP em MongoDB (opcional) |
-| `metrics` | Health e Prometheus |
-| `database` | TypeORM, migrations e seed |
+Diagrama de camadas, fluxo de requisição e módulos: **[Arquitetura](/guide/architecture)**.
 
 ## Próximos passos
 
-- [Tecnologias](/guide/technologies)
-- [Funcionalidades](/guide/features)
-- [Docker](/guide/docker-setup)
+| Objetivo | Página |
+|---|---|
+| Subir o projeto | [Docker](/guide/docker-setup) |
+| Desenvolver localmente | [Execução local](/guide/local-setup) |
+| Entender monitoramento | [Monitoramento](/guide/monitoring) |
+| Rodar testes | [Testes](/guide/tests) |

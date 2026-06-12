@@ -7,6 +7,7 @@ API REST para gestão de frota da plataforma **Aivacol** — cadastro de marcas,
 | Objetivo | Página |
 |---|---|
 | Entender o projeto | [Visão geral](/guide/overview) |
+| Arquitetura | [Arquitetura](/guide/architecture) |
 | Subir com Docker | [Docker](/guide/docker-setup) |
 | Desenvolver localmente | [Execução local](/guide/local-setup) |
 | Acessar API e Swagger | [API](/guide/api) |

@@ -12,6 +12,7 @@ const base = normalizeBase(process.env.VITEPRESS_BASE);
 
 const guideSidebar = [
   { text: 'Visão geral', link: '/guide/overview' },
+  { text: 'Arquitetura', link: '/guide/architecture' },
   { text: 'Tecnologias', link: '/guide/technologies' },
   { text: 'Funcionalidades', link: '/guide/features' },
   { text: 'Docker', link: '/guide/docker-setup' },
