@@ -2,7 +2,7 @@
 
 ## Forma recomendada: Docker Compose
 
-Para **testes, avaliação e validação do projeto**, use sempre o stack completo via Docker Compose. Esse caminho sobe a API já compilada (Node.js 22), aplica migrations, conecta todas as dependências externas com os hosts corretos e evita divergência entre ambientes.
+Para **validação funcional completa do projeto**, use sempre o stack completo via Docker Compose. Esse caminho sobe a API já compilada (Node.js 22), aplica migrations, conecta todas as dependências externas com os hosts corretos e evita divergência entre ambientes.
 
 Na raiz do repositório (pasta com `docker-compose.yml`):
 
@@ -90,23 +90,9 @@ Com `DATABASE_ENABLED=false`, a API inicia **sem** TypeORM e **sem** rotas prote
 |---|---|---|
 | Docker + Docker Compose | Obrigatório | Opcional (pode subir só a infra) |
 | Node.js 22+ | Não necessário na máquina | Obrigatório |
-| Portas livres | Sim | Sim |
+| Portas livres | Sim — veja [Verificação de Portas](/getting-started/ports) | Sim |
 
-Portas utilizadas pelo stack completo:
-
-| Porta | Serviço |
-|---|---|
-| 3001 | API NestJS |
-| 3002 | Grafana |
-| 3003 | VitePress (docs) |
-| 1433 | SQL Server |
-| 6379 | Redis |
-| 9090 | Prometheus |
-| 8080 | cAdvisor (métricas de containers) |
-| 9121 | info_redis_exporter |
-| 9115 | info_blackbox (health probes) |
-| 15672 | RabbitMQ Management |
-| 27017 | MongoDB |
+Portas utilizadas pelo stack completo estão documentadas em [Verificação de Portas](/getting-started/ports).
 
 ---
 
