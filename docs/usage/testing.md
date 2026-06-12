@@ -9,7 +9,7 @@
 | Testes automatizados e2e | `npm run test:e2e` | Nenhuma (banco em memória com `sql.js`) |
 | Build de produção | `npm run build` | Nenhuma |
 
-Para avaliação manual da API (login, CRUD, health, Swagger, Grafana), **suba o stack Docker** conforme [Executar o Projeto](/getting-started/installation). Execução local com `npm run start:dev` ou `npm run start:prod` é alternativa para desenvolvimento — exige configurar SQL Server (e opcionalmente Redis/MongoDB) manualmente; veja a seção de resolução de problemas na instalação.
+Para validação manual da API (login, CRUD, health, Swagger, Grafana), **suba o stack Docker** conforme [Executar o Projeto](/getting-started/installation). Execução local com `npm run start:dev` ou `npm run start:prod` é alternativa para desenvolvimento — exige configurar SQL Server (e opcionalmente Redis/MongoDB) manualmente; veja a seção de resolução de problemas na instalação.
 
 ---
 
@@ -69,4 +69,4 @@ npm run docs:build
 | `tsconfig.build.json` | Build de produção — exclui testes e specs |
 | `tsconfig.spec.json` | Compilação dos testes Jest (`types: node`, `jest`) |
 
-**Próximo passo:** [6. Paginação](/usage/pagination) → [API](/api/auth) → [Arquitetura](/architecture/overview)
+**Próximo passo:** [6. Paginação](/usage/pagination) → [Checklist de Validação](/usage/validation-checklist) → [CI/CD](/architecture/cicd)

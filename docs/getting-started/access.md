@@ -50,4 +50,6 @@ curl -s http://localhost:3001/api/metrics | head -5
 - [ ] Grafana acessível em `:3002` com dashboards **Infraestrutura** e **REST API — Observabilidade NestJS** (pasta InfoSistemas; filtro por rota disponível)
 - [ ] VitePress acessível em `:3003`
 
-**Próximo passo:** [4. Autenticação](/usage/authentication)
+Consulte também [Verificação de Portas](/getting-started/ports) e [Checklist de Validação](/usage/validation-checklist).
+
+**Próximo passo:** [5. Autenticação](/usage/authentication)

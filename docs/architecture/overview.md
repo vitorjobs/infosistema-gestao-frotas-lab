@@ -70,3 +70,5 @@ src/
 | `info_prometheus` | Coleta de métricas |
 | `info_grafana` | Dashboards |
 | `info_docs` | VitePress em produção |
+
+Fluxo de entrega contínua: [CI/CD](/architecture/cicd).

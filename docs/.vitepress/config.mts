@@ -17,10 +17,12 @@ const sidebar = [
     items: [
       { text: '1. Executar o Projeto', link: '/getting-started/installation' },
       { text: '2. Configuração', link: '/getting-started/configuration' },
-      { text: '3. Pontos de Acesso', link: '/getting-started/access' },
-      { text: '4. Autenticação', link: '/usage/authentication' },
-      { text: '5. Executar Testes', link: '/usage/testing' },
-      { text: '6. Paginação', link: '/usage/pagination' },
+      { text: '3. Verificação de Portas', link: '/getting-started/ports' },
+      { text: '4. Pontos de Acesso', link: '/getting-started/access' },
+      { text: '5. Autenticação', link: '/usage/authentication' },
+      { text: '6. Executar Testes', link: '/usage/testing' },
+      { text: '7. Paginação', link: '/usage/pagination' },
+      { text: '8. Checklist de Validação', link: '/usage/validation-checklist' },
     ],
   },
   {
@@ -39,6 +41,7 @@ const sidebar = [
       { text: 'Visão Geral', link: '/architecture/overview' },
       { text: 'Banco de Dados', link: '/architecture/database' },
       { text: 'Monitoramento', link: '/architecture/monitoring' },
+      { text: 'CI/CD', link: '/architecture/cicd' },
     ],
   },
 ];
