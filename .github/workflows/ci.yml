@@ -20,6 +20,9 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  VITEPRESS_BASE: /infosistema-gestao-frotas-lab/
+
 jobs:
   build-and-unit-tests:
     name: Build and unit tests

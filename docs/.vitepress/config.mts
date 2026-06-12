@@ -41,22 +41,6 @@ const sidebar = [
       { text: 'Monitoramento', link: '/architecture/monitoring' },
     ],
   },
-  {
-    text: 'Guia do Desenvolvedor',
-    collapsed: true,
-    items: [
-      { text: 'Início', link: '/dev-guide/' },
-      { text: 'Projeto Completo', link: '/dev-guide/projeto-completo' },
-      { text: 'Módulo Vehicles', link: '/dev-guide/modulo-vehicles' },
-      { text: 'Fluxos de Dados', link: '/dev-guide/fluxos-de-dados' },
-      {
-        text: 'SOLID, Clean Code e Patterns',
-        link: '/dev-guide/solid-clean-code-patterns',
-      },
-      { text: 'Defesa do Teste Técnico', link: '/dev-guide/defesa-teste-tecnico' },
-      { text: 'Diagramas', link: '/dev-guide/diagramas' },
-    ],
-  },
 ];
 
 export default defineConfig({
@@ -72,7 +56,6 @@ export default defineConfig({
       '/usage/': sidebar,
       '/api/': sidebar,
       '/architecture/': sidebar,
-      '/dev-guide/': sidebar,
     },
     footer: {
       message: 'Lançado sob a Licença MIT.',

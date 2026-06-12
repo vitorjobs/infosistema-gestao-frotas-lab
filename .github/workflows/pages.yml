@@ -12,6 +12,9 @@ on:
       - .github/workflows/pages.yml
   workflow_dispatch:
 
+env:
+  VITEPRESS_BASE: /infosistema-gestao-frotas-lab/
+
 permissions:
   contents: read
   pages: write
