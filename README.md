@@ -12,15 +12,17 @@ Use esse endereco como ponto de partida para instalacao, configuracao, autentica
 
 ## Pre-requisitos
 
-- Node.js 18+
-- Docker e Docker Compose (recomendado)
+- Docker e Docker Compose (**recomendado para testes e avaliacao**)
+- Node.js 22+ (obrigatorio apenas para desenvolvimento local ou testes automatizados fora do container)
 
-## Inicio rapido com Docker
+## Inicio rapido com Docker (recomendado)
 
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
+
+Este e o caminho preferencial: sobe a API (Node 22), SQL Server, Redis, MongoDB, monitoramento e documentacao com configuracao coerente.
 
 Servicos:
 
@@ -38,17 +40,38 @@ Servicos:
 
 Usuario seed: `aivacol` / `aivacol`
 
-## Desenvolvimento local
+## Dependencias externas
+
+| Servico | Obrigatorio para CRUD | No Docker Compose |
+|---|---|---|
+| SQL Server | Sim | `info_sqlserver` (:1433) |
+| Redis | Nao em dev (`start:dev` usa memoria) | `info_redis` (:6379) |
+| MongoDB | Nao (auditoria opcional) | `info_mongodb` (:27017) |
+
+Detalhes, portas e troubleshooting: documentacao em [Executar o Projeto](https://vitorjobs.github.io/infosistema-gestao-frotas-lab/getting-started/installation).
+
+## Desenvolvimento local (alternativa)
+
+Preferivel apenas para hot reload. Para testes funcionais, use Docker.
 
 ```bash
-npm install
+npm ci
 cp .env.example .env
+# Ajuste hosts para localhost se a infra subir via Docker
+docker compose up -d info_sqlserver info_redis info_mongodb
 npm run migration:run
 npm run seed
-npm run start:dev
+npm run start:dev          # cache em memoria (Redis opcional)
 ```
 
-Com Redis:
+Producao local (codigo compilado):
+
+```bash
+npm run build
+npm run start:prod         # NODE_ENV=production
+```
+
+Com Redis em dev:
 
 ```bash
 npm run start:dev:redis
@@ -80,7 +103,8 @@ Auditoria MongoDB:
 | Script | Descricao |
 |---|---|
 | `npm run build` | Compila TypeScript |
-| `npm run start` | Inicia build de producao |
+| `npm run start` | Inicia build compilado (`node dist/main`) |
+| `npm run start:prod` | Producao local (`NODE_ENV=production`) |
 | `npm run start:dev` | Dev com cache em memoria |
 | `npm run start:dev:redis` | Dev com Redis |
 | `npm test` | Testes unitarios |
@@ -133,10 +157,14 @@ test/           Testes e2e
 
 ## Testes
 
+Testes automatizados (sem containers):
+
 ```bash
 npm test
 npm run test:e2e
 ```
+
+Validacao funcional completa da API (login, CRUD, health, Swagger): use `docker compose up -d --build`.
 
 ## Documentacao VitePress
 

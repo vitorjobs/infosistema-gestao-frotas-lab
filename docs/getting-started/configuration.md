@@ -2,6 +2,8 @@
 
 Copie `.env.example` para `.env` e ajuste conforme o ambiente. A fonte canônica de variáveis é `.env.example`.
 
+> **Execução local:** se a API roda no host (fora do Docker), altere `DATABASE_HOST`, `REDIS_HOST` e `MONGODB_URI` para `localhost`. No Docker Compose, mantenha os nomes dos serviços (`info_sqlserver`, `info_redis`, `info_mongodb`). Veja [Executar o Projeto](/getting-started/installation).
+
 ## Banco de dados (SQL Server)
 
 | Variável | Descrição |
@@ -43,6 +45,8 @@ No Docker Compose, `info_sqlserver`, `info_redis` e `info_mongodb` continuam def
 | `USE_MEMORY_CACHE` | `true` usa cache em memória em vez de Redis |
 
 Quando `REDIS_ENABLED=false`, `USE_MEMORY_CACHE=true` ou em `npm run start:dev`, listagens de brands, models e vehicles usam cache em memória.
+
+Em `npm run start:prod`, o cache segue estritamente o `.env` — alinhe `REDIS_ENABLED` e `USE_MEMORY_CACHE` ao ambiente desejado.
 
 ## Auditoria (MongoDB)
 

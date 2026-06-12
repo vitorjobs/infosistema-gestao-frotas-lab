@@ -4,7 +4,7 @@ const baseConfig = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.spec.json' }],
   },
 };
 
