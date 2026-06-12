@@ -10,40 +10,24 @@ function normalizeBase(value = '/'): string {
 
 const base = normalizeBase(process.env.VITEPRESS_BASE);
 
+const guideSidebar = [
+  { text: 'Visão geral', link: '/guide/overview' },
+  { text: 'Tecnologias', link: '/guide/technologies' },
+  { text: 'Funcionalidades', link: '/guide/features' },
+  { text: 'Docker', link: '/guide/docker-setup' },
+  { text: 'Execução local', link: '/guide/local-setup' },
+  { text: 'Ambiente e portas', link: '/guide/environment' },
+  { text: 'API e Swagger', link: '/guide/api' },
+  { text: 'Monitoramento', link: '/guide/monitoring' },
+  { text: 'Banco de dados', link: '/guide/database' },
+  { text: 'Testes', link: '/guide/tests' },
+  { text: 'CI/CD', link: '/guide/cicd' },
+  { text: 'Troubleshooting', link: '/guide/troubleshooting' },
+];
+
 const sidebar = [
-  { text: 'Visão Geral', link: '/' },
-  {
-    text: 'Guia',
-    items: [
-      { text: '1. Executar o Projeto', link: '/getting-started/installation' },
-      { text: '2. Configuração', link: '/getting-started/configuration' },
-      { text: '3. Verificação de Portas', link: '/getting-started/ports' },
-      { text: '4. Pontos de Acesso', link: '/getting-started/access' },
-      { text: '5. Autenticação', link: '/usage/authentication' },
-      { text: '6. Executar Testes', link: '/usage/testing' },
-      { text: '7. Paginação', link: '/usage/pagination' },
-      { text: '8. Checklist de Validação', link: '/usage/validation-checklist' },
-    ],
-  },
-  {
-    text: 'API',
-    items: [
-      { text: 'Autenticação', link: '/api/auth' },
-      { text: 'Marcas', link: '/api/brands' },
-      { text: 'Modelos', link: '/api/models' },
-      { text: 'Veículos', link: '/api/vehicles' },
-      { text: 'Usuários', link: '/api/users' },
-    ],
-  },
-  {
-    text: 'Arquitetura',
-    items: [
-      { text: 'Visão Geral', link: '/architecture/overview' },
-      { text: 'Banco de Dados', link: '/architecture/database' },
-      { text: 'Monitoramento', link: '/architecture/monitoring' },
-      { text: 'CI/CD', link: '/architecture/cicd' },
-    ],
-  },
+  { text: 'Início', link: '/' },
+  { text: 'Guia', items: guideSidebar },
 ];
 
 export default defineConfig({
@@ -52,13 +36,13 @@ export default defineConfig({
   base,
   ignoreDeadLinks: [/^https?:\/\/localhost(:\d+)?/],
   themeConfig: {
-    nav: [{ text: 'Início', link: '/' }],
+    nav: [
+      { text: 'Início', link: '/' },
+      { text: 'Guia', link: '/guide/overview' },
+    ],
     sidebar: {
       '/': sidebar,
-      '/getting-started/': sidebar,
-      '/usage/': sidebar,
-      '/api/': sidebar,
-      '/architecture/': sidebar,
+      '/guide/': sidebar,
     },
     footer: {
       message: 'Lançado sob a Licença MIT.',

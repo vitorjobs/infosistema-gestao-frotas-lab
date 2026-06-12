@@ -1,56 +1,28 @@
-# Documentação - Projeto Gestão de Rotas
+# Gestão de Rotas
 
-Backend da plataforma Aivacol de Gestão de Frota — NestJS, TypeORM, SQL Server, JWT, Redis, Docker, Prometheus, Grafana e auditoria MongoDB.
+API REST para gestão de frota da plataforma **Aivacol** — cadastro de marcas, modelos e veículos, autenticação JWT, cache, observabilidade e auditoria opcional.
 
-## Documentação publicada
+## Comece aqui
 
-**https://vitorjobs.github.io/infosistema-gestao-frotas-lab/**
-
-## Roteiro
-
-Siga a documentação nesta ordem (menu lateral):
-
-| Passo | Página | Objetivo |
-|---|---|---|
-| 1 | [Executar o Projeto](/getting-started/installation) | Subir o stack com Docker Compose |
-| 2 | [Configuração](/getting-started/configuration) | Variáveis de ambiente |
-| 3 | [Verificação de Portas](/getting-started/ports) | Confirmar portas livres |
-| 4 | [Pontos de Acesso](/getting-started/access) | API, Swagger, health e monitoramento |
-| 5 | [Autenticação](/usage/authentication) | Login JWT |
-| 6 | [Executar Testes](/usage/testing) | Testes unitários e e2e |
-| 7 | [Paginação](/usage/pagination) | Convenção de listagens |
-| 8 | [Checklist de Validação](/usage/validation-checklist) | Verificação da entrega |
-| 9 | [API](/api/auth) | Endpoints |
-| 10 | [Arquitetura](/architecture/overview) | Stack, módulos e observabilidade |
-| 11 | [CI/CD](/architecture/cicd) | Pipeline GitHub Actions |
-
-## Início rápido
-
-**Recomendado:** subir o projeto inteiro com Docker Compose.
-
-Na raiz do repositório:
-
-```bash
-cp .env.example .env
-docker compose up -d --build
-docker compose ps
-```
-
-Aguarde os containers ficarem em execução e siga para [Pontos de Acesso](/getting-started/access).
-
-Execução local (`npm run start:dev` / `npm run start:prod`) é alternativa para desenvolvimento — exige SQL Server acessível e ajuste de hosts no `.env`. Consulte [Executar o Projeto](/getting-started/installation).
-
-## Resumo de acessos
-
-| Serviço | URL |
+| Objetivo | Página |
 |---|---|
-| API | http://localhost:3001/api |
+| Entender o projeto | [Visão geral](/guide/overview) |
+| Subir com Docker | [Docker](/guide/docker-setup) |
+| Desenvolver localmente | [Execução local](/guide/local-setup) |
+| Acessar API e Swagger | [API](/guide/api) |
+| Monitorar a aplicação | [Monitoramento](/guide/monitoring) |
+| Rodar testes | [Testes](/guide/tests) |
+
+## Links rápidos
+
+| Recurso | URL |
+|---|---|
 | Swagger | http://localhost:3001/api/docs |
 | Health | http://localhost:3001/api/health |
-| Docs (esta página, local) | http://localhost:3003 |
 | Grafana | http://localhost:3002 |
 | Prometheus | http://localhost:9090 |
+| Docs local | http://localhost:3003 |
 
-Usuário seed da API: `aivacol` / `aivacol`
+Documentação publicada: **https://vitorjobs.github.io/infosistema-gestao-frotas-lab/**
 
-Detalhes completos em [Pontos de Acesso](/getting-started/access).
+Usuário seed: `aivacol` / `aivacol`
