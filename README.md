@@ -2,6 +2,14 @@
 
 Backend da plataforma Aivacol de Gestao de Frota (NestJS + TypeORM + SQL Server + JWT + Redis).
 
+## Documentacao publicada
+
+A documentacao da aplicacao esta disponivel em:
+
+https://vitorjobs.github.io/infosistema-gestao-frotas-lab/
+
+Use esse endereco como ponto de partida para instalacao, configuracao, autenticacao, testes, API e arquitetura.
+
 ## Pre-requisitos
 
 - Node.js 18+
@@ -131,6 +139,12 @@ npm run test:e2e
 ```
 
 ## Documentacao VitePress
+
+Acesse a documentacao publicada em:
+
+https://vitorjobs.github.io/infosistema-gestao-frotas-lab/
+
+Para executar ou gerar a documentacao localmente:
 
 ```bash
 npm run docs:dev
