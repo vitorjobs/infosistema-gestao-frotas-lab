@@ -44,6 +44,10 @@ Passo a passo completo: [Executar o Projeto](https://vitorjobs.github.io/infosis
 - **Docker e Docker Compose** — caminho recomendado para execução local
 - **Node.js 22+** — desenvolvimento ativo e testes automatizados (`npm ci`, `npm test`)
 
+## Preview
+
+![Swagger — Documentação REST API](.github/img/swagger.png)
+
 ## Imagens ilustrativas
 
-Capturas reais de Swagger, Grafana e VitePress ainda não estão versionadas em `docs/public/images/`. Consulte a [documentação publicada](https://vitorjobs.github.io/infosistema-gestao-frotas-lab/getting-started/access) para validar os pontos de acesso após subir o stack.
+Captura real do Swagger após subir o stack com Docker Compose (`http://localhost:3001/api/docs`). Demais capturas (Grafana, VitePress) podem ser adicionadas em `.github/img/` conforme disponíveis.

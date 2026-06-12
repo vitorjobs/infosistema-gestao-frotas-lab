@@ -47,8 +47,8 @@ const sidebar = [
 ];
 
 export default defineConfig({
-  title: 'gestao_frotas_api',
-  description: 'Documentação da API de Gestão de Frota',
+  title: 'Documentação - Projeto Gestão de Rotas',
+  description: 'Documentação técnica do projeto de Gestão de Frota (Aivacol)',
   base,
   ignoreDeadLinks: [/^https?:\/\/localhost(:\d+)?/],
   themeConfig: {

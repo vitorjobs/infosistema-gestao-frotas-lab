@@ -1,4 +1,4 @@
-# gestao_frotas_api
+# Documentação - Projeto Gestão de Rotas
 
 Backend da plataforma Aivacol de Gestão de Frota — NestJS, TypeORM, SQL Server, JWT, Redis, Docker, Prometheus, Grafana e auditoria MongoDB.
 
