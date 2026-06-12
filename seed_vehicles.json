@@ -1,0 +1,26 @@
+{
+  "brands": [
+    { "name": "Volkswagen" },
+    { "name": "Ford" }
+  ],
+  "models": [
+    { "name": "Gol", "brand": "Volkswagen" },
+    { "name": "Ranger", "brand": "Ford" }
+  ],
+  "vehicles": [
+    {
+      "license_plate": "ABC1D23",
+      "chassis": "9BWZZZ377VT004251",
+      "renavam": "12345678901",
+      "year": 2024,
+      "model": "Gol"
+    },
+    {
+      "license_plate": "DEF4G56",
+      "chassis": "9BFZZZ54XKB123456",
+      "renavam": "98765432109",
+      "year": 2023,
+      "model": "Ranger"
+    }
+  ]
+}

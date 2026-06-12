@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: infosistemas
+    orgId: 1
+    folder: InfoSistemas
+    type: file
+    disableDeletion: false
+    editable: true
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json

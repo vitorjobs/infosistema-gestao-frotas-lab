@@ -1,0 +1,1009 @@
+{
+  "info": {
+    "_postman_id": "c7b31721-4d75-4bb9-bd11-14ce8f8f0de1",
+    "name": "gestao_frotas_api",
+    "description": "Collection para testar a gestao_frotas_api. Espelha o Swagger em `{{baseUrl}}/api/docs`.\n\nComo usar:\n1. Suba a aplicacao e confirme `baseUrl` (padrao `http://localhost:3001`).\n2. Execute `01 - Auth / Login - usuario padrao aivacol` primeiro. O teste salva `accessToken`.\n3. Execute as pastas na ordem numerica. Variaveis `brandId`, `modelId`, `vehicleId` e `userId` sao salvas automaticamente.\n4. Usuario seed: nickname `aivacol`, password `aivacol`.\n\nPaginacao:\n- Listagens usam `?page=1&limit=20` (max 100).\n- Resposta: `{ data: T[], meta: { total, page, limit, totalPages } }`.\n\nStatus HTTP:\n- Login: 200 | Create: 201 | Get/Patch: 200 | Delete: 204 | Validacao: 400 | Sem JWT: 401 | Conflito: 409\n\nRegras de negocio:\n- Marcas: nome unico; DELETE 204; bloqueio 409 com models vinculados.\n- Modelos: nome unico; `brand_id` opcional; DELETE 204; bloqueio 409 com vehicles.\n- Veiculos: `model_id` obrigatorio; placa/chassi/renavam unicos; placa/chassi maiusculas; cache Redis `vehicles:page:{page}:{limit}` e `vehicle:{id}`.\n- Usuarios: consulta paginada sem `password_hash`.\n- Metadados `created_at`, `updated_at`, `created_by` automaticos.\n- Erros no envelope global padronizado.\n\nRotas publicas: `/api/health` (SQL Server + Redis), `/api/metrics`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "brandId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "brandName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "modelId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "modelName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vehicleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vehiclePlate",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vehicleChassis",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vehicleRenavam",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "page",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "limit",
+      "value": "20",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Publicas e Documentacao",
+      "item": [
+        {
+          "name": "Health publico - SQL Server e Redis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health",
+            "description": "Verifica SQL Server (`database`) e Redis (`redis`). Retorna 200 quando saudavel ou 503 quando alguma dependencia falhar. Nao exige JWT."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Health retorna 200 ou 503', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 503]);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Health inclui database e redis', function () {",
+                  "  pm.expect(json).to.have.property('details');",
+                  "  pm.expect(json.details).to.have.property('database');",
+                  "  pm.expect(json.details).to.have.property('redis');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Metricas Prometheus",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/metrics",
+            "description": "Expoe metricas em formato Prometheus text/plain. Nao exige JWT."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Metrics retorna texto Prometheus', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.text()).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Login - usuario padrao aivacol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Autentica o usuario seed e retorna JWT. Status esperado: 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"aivacol\",\n  \"password\": \"aivacol\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login retorna 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Resposta possui JWT e usuario', function () {",
+                  "  pm.expect(json.access_token).to.be.a('string').and.not.empty;",
+                  "  pm.expect(json.token_type).to.eql('Bearer');",
+                  "  pm.expect(json.user.nickname).to.eql('aivacol');",
+                  "  pm.expect(json.user.email).to.eql('aivacol@example.com');",
+                  "  pm.expect(json.user.name).to.eql('Aivacol Admin');",
+                  "});",
+                  "pm.collectionVariables.set('accessToken', json.access_token);",
+                  "pm.collectionVariables.set('userId', String(json.user.sub));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me - token salvo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/me",
+            "description": "Retorna dados do JWT validado. Requer Bearer token.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Me retorna usuario autenticado', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.nickname).to.eql('aivacol');",
+                  "  pm.expect(json).to.have.property('sub');",
+                  "  pm.expect(json.email).to.eql('aivacol@example.com');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me - sem token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/me",
+            "description": "Valida protecao JWT global."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Me sem token retorna 401', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Erro segue envelope global', function () {",
+                  "  pm.expect(json.success).to.eql(false);",
+                  "  pm.expect(json).to.have.property('statusCode');",
+                  "  pm.expect(json).to.have.property('timestamp');",
+                  "  pm.expect(json).to.have.property('path');",
+                  "  pm.expect(json).to.have.property('method');",
+                  "  pm.expect(json.error).to.have.property('code');",
+                  "  pm.expect(json.error).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Users",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Listar Users paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            },
+            "description": "Retorna usuarios paginados sem expor `password_hash`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista users paginada', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('data');",
+                  "  pm.expect(json).to.have.property('meta');",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "  pm.expect(json.meta).to.include.keys('total', 'page', 'limit', 'totalPages');",
+                  "  pm.expect(json.meta.page).to.eql(1);",
+                  "  pm.expect(json.meta.limit).to.eql(20);",
+                  "});",
+                  "const user = pm.response.json().data.find((item) => String(item.id) === pm.collectionVariables.get('userId'));",
+                  "pm.test('Usuario seed presente e sem senha', function () {",
+                  "  pm.expect(user).to.be.an('object');",
+                  "  pm.expect(user).to.not.have.property('password_hash');",
+                  "  pm.expect(user.nickname).to.eql('aivacol');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar User por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "description": "Retorna usuario por id sem expor senha."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca user seed', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(String(json.id)).to.eql(pm.collectionVariables.get('userId'));",
+                  "  pm.expect(json.nickname).to.eql('aivacol');",
+                  "  pm.expect(json).to.not.have.property('password_hash');",
+                  "  pm.expect(json).to.have.property('created_by');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Brands",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Criar Brand",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/brands",
+            "description": "Cria marca unica. `created_by` preenchido pelo usuario autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{brandName}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('brandName', `Postman Brand ${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Brand criada', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.be.a('number');",
+                  "  pm.expect(json.name).to.eql(pm.collectionVariables.get('brandName'));",
+                  "  pm.expect(json.created_by).to.eql('aivacol');",
+                  "  pm.expect(json.created_at).to.be.a('string').and.not.empty;",
+                  "  pm.expect(json.updated_at).to.be.a('string').and.not.empty;",
+                  "  pm.collectionVariables.set('brandId', String(json.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Brands paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            },
+            "description": "Retorna marcas paginadas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista brands paginada', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "  pm.expect(json.meta.total).to.be.at.least(1);",
+                  "  pm.expect(json.data.some((b) => String(b.id) === pm.collectionVariables.get('brandId'))).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar Brand por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/brands/{{brandId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca brand criada', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(pm.response.json().id)).to.eql(pm.collectionVariables.get('brandId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Brand",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/brands/{{brandId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{brandName}} Updated\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza brand', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().name).to.eql(`${pm.collectionVariables.get('brandName')} Updated`);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Models",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Criar Model vinculado a Brand",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/models",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{modelName}}\",\n  \"brand_id\": {{brandId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('modelName', `Postman Model ${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Model criado', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.be.a('number');",
+                  "  pm.expect(json.name).to.eql(pm.collectionVariables.get('modelName'));",
+                  "  pm.expect(String(json.brand_id)).to.eql(pm.collectionVariables.get('brandId'));",
+                  "  pm.expect(json.created_by).to.eql('aivacol');",
+                  "  pm.collectionVariables.set('modelId', String(json.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Models paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/models?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "models"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista models paginada', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "  pm.expect(json.data.some((m) => String(m.id) === pm.collectionVariables.get('modelId'))).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar Model por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/models/{{modelId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca model criado', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(pm.response.json().id)).to.eql(pm.collectionVariables.get('modelId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Model",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/models/{{modelId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{modelName}} Updated\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza model', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().name).to.eql(`${pm.collectionVariables.get('modelName')} Updated`);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - Vehicles",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Criar Vehicle vinculado ao Model",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/vehicles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"license_plate\": \"{{vehiclePlate}}\",\n  \"chassis\": \"{{vehicleChassis}}\",\n  \"renavam\": \"{{vehicleRenavam}}\",\n  \"year\": 2025,\n  \"model_id\": {{modelId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const now = Date.now();",
+                  "const suffix = String(now).slice(-6);",
+                  "pm.collectionVariables.set('vehiclePlate', `PM${suffix}`);",
+                  "pm.collectionVariables.set('vehicleChassis', `CHS${now}`);",
+                  "pm.collectionVariables.set('vehicleRenavam', `REN${now}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Vehicle criado', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.license_plate).to.eql(pm.collectionVariables.get('vehiclePlate').toUpperCase());",
+                  "  pm.expect(json.chassis).to.eql(pm.collectionVariables.get('vehicleChassis').toUpperCase());",
+                  "  pm.expect(String(json.model_id)).to.eql(pm.collectionVariables.get('modelId'));",
+                  "  pm.collectionVariables.set('vehicleId', String(json.id));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Vehicles paginado - Redis Cache",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles?page={{page}}&limit={{limit}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            },
+            "description": "Cache Redis na chave `vehicles:page:{page}:{limit}`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista vehicles paginada', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "  pm.expect(json.data.some((v) => String(v.id) === pm.collectionVariables.get('vehicleId'))).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar Vehicle por ID - Redis Cache",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vehicles/{{vehicleId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca vehicle criado', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(String(pm.response.json().id)).to.eql(pm.collectionVariables.get('vehicleId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Vehicle - invalida cache",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/vehicles/{{vehicleId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": 2026\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza vehicle', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().year).to.eql(2026);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Vehicles apos update",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vehicles?page={{page}}&limit={{limit}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista apos update reflete veiculo', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const vehicle = pm.response.json().data.find((item) => String(item.id) === pm.collectionVariables.get('vehicleId'));",
+                  "  pm.expect(vehicle).to.be.an('object');",
+                  "  pm.expect(vehicle.year).to.eql(2026);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 - Regras de negocio e erros",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Remover Model com Vehicle vinculado - 409",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/models/{{modelId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Model vinculado retorna 409', function () { pm.response.to.have.status(409); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Envelope de erro', function () {",
+                  "  pm.expect(json.success).to.eql(false);",
+                  "  pm.expect(json.error).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remover Brand com Model vinculado - 409",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/brands/{{brandId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Brand vinculada retorna 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar Vehicle com payload invalido - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/vehicles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"license_plate\": \"\",\n  \"chassis\": \"\",\n  \"renavam\": \"\",\n  \"year\": 1800,\n  \"model_id\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Payload invalido retorna 400', function () { pm.response.to.have.status(400); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Envelope de erro com details', function () {",
+                  "  pm.expect(json.success).to.eql(false);",
+                  "  pm.expect(json.error.message).to.eql('Validacao falhou');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 - Cleanup",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Remover Vehicle - 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/vehicles/{{vehicleId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove vehicle retorna 204', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "  pm.expect(pm.response.text()).to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remover Model - 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/models/{{modelId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove model retorna 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remover Brand - 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/brands/{{brandId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove brand retorna 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

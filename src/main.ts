@@ -1,0 +1,79 @@
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { disableDatabase, isDatabaseEnabled } from './config/database-enabled';
+import { ensureDatabase } from './database/ensure-database';
+
+const API_DESCRIPTION = [
+  'API da plataforma Aivacol de Gestao de Frota.',
+  '',
+  'Documentacao espelhada na collection Postman em `postman/aivacol-fleet-management.postman_collection.json`.',
+  '',
+  'Fluxo de uso:',
+  '1. Autentique em `POST /api/auth/login` (200) com usuario seed `aivacol` / `aivacol`.',
+  '2. Use o `access_token` no header `Authorization: Bearer <token>`.',
+  '3. Consuma as rotas protegidas de users, brands, models e vehicles.',
+  '',
+  'Paginacao (listagens):',
+  '- Query params `page` (padrao 1) e `limit` (padrao 20, max 100).',
+  '- Resposta: `{ data: T[], meta: { total, page, limit, totalPages } }`.',
+  '',
+  'Regras de negocio:',
+  '- Brands: nome unico; DELETE retorna 204; bloqueio 409 se houver models vinculados.',
+  '- Models: nome unico; `brand_id` opcional/nulo; DELETE 204; bloqueio 409 se houver vehicles.',
+  '- Vehicles: `model_id` obrigatorio; placa/chassi/renavam unicos; placa/chassi em maiusculas;',
+  '- Cache Redis nas listagens de brands, models e vehicles; vehicles tambem usa cache por id;',
+  '  invalidacao automatica em mutacoes.',
+  '- Users: consulta paginada sem expor `password_hash`.',
+  '- Metadados `created_at`, `updated_at`, `created_by` preenchidos automaticamente.',
+  '- Validacao Zod; erros no envelope `{ success, statusCode, timestamp, path, method, error }`.',
+  '',
+  'Auditoria (MongoDB):',
+  '- Interceptor global registra metodo, rota, status, usuario, duracao e corpo sanitizado.',
+  '- Coleção `http_audit_logs` no banco definido por `MONGODB_URI` (padrao `audit_db`).',
+  '- Campos sensiveis (`password`, `password_hash`, `access_token`, `refresh_token`, `authorization`, `token`) sao mascarados recursivamente.',
+  '- Desabilitar com `AUDIT_ENABLED=false` ou omitindo `MONGODB_URI`.',
+  '',
+  'Rotas publicas: `/api/health` (SQL Server + Redis + MongoDB), `/api/metrics` (Prometheus).',
+].join('\n');
+
+async function bootstrap() {
+  if (isDatabaseEnabled()) {
+    try {
+      await ensureDatabase();
+    } catch (error) {
+      disableDatabase();
+      console.warn(
+        'SQL Server indisponivel; iniciando API sem modulos dependentes de banco.',
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  const { AppModule } = await import('./app.module');
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+
+  const config = new DocumentBuilder()
+    .setTitle('gestao_frotas_api')
+    .setDescription(API_DESCRIPTION)
+    .setVersion('0.1.0')
+    .addTag('auth', 'Autenticacao JWT: login (200) e usuario autenticado.')
+    .addTag('users', 'Consulta protegida de usuarios (paginada, sem senha).')
+    .addTag('brands', 'CRUD protegido de marcas com paginacao e DELETE 204.')
+    .addTag('models', 'CRUD protegido de modelos com vinculo opcional de marca.')
+    .addTag('vehicles', 'CRUD protegido de veiculos com cache Redis paginado.')
+    .addTag('health', 'Health check publico de SQL Server, Redis e MongoDB de auditoria.')
+    .addTag('metrics', 'Metricas publicas em formato Prometheus.')
+    .addServer('http://localhost:3001', 'Local')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
+  const port = process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 3001;
+  await app.listen(port);
+  console.log(`Aplicacao escutando na porta ${port}`);
+}
+
+bootstrap();

@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+
+# Builds e artefatos gerados
+dist/
+coverage/
+docs/.vitepress/cache/
+docs/.vitepress/.temp/
+docs/.vitepress/dist/
+
+# Ambiente local e segredos
+.env
+.env.*
+!.env.example
+
+# Banco local gerado pelos testes e2e
+fleet-test-db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Estado local de ferramentas
+.agents/
+.codex/
+.ia/
+.vscode/
+
+# Backups locais gerados por agentes
+.backup/
+
+# Documentacao interna de desenvolvimento
+docs/dev-guide/

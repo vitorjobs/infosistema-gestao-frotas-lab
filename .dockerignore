@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+docs/.vitepress/cache
+docs/.vitepress/.temp
+docs/.vitepress/dist
+.git
+.backup
+.agents
+.codex
+.ia
+.env
+.env.*
+!.env.example
+docs/dev-guide
+npm-debug.log*

@@ -1,0 +1,64 @@
+name: Promote staging to main
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    branches:
+      - staging
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: promote-staging-to-main
+  cancel-in-progress: false
+
+jobs:
+  open-promotion-pr:
+    name: Open production promotion PR
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create or reuse production promotion PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          existing_pr="$(gh pr list \
+            --base main \
+            --head staging \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [ -n "$existing_pr" ]; then
+            echo "Production promotion PR already open: #$existing_pr"
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head staging \
+            --title "Promote staging to main" \
+            --body "$(cat <<'EOF'
+          ## Summary
+          - Promotes the latest validated changes from `staging` to `main`.
+          - This PR is created automatically after the `staging` CI succeeds.
+
+          ## Production gate
+          - Keep `main` protected and require approval before merge.
+          - CI must pass again against `main` before production delivery.
+          EOF
+          )"

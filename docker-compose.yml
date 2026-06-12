@@ -1,0 +1,174 @@
+services:
+  info_api:
+    container_name: info_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_ENABLED: "true"
+      DATABASE_HOST: info_sqlserver
+      DATABASE_PORT: 1433
+      DATABASE_USER: SA
+      DATABASE_PASSWORD: YourStrong@Password
+      DATABASE_NAME: gestao_frotas_api
+      DATABASE_AUTO_CREATE: "true"
+      DATABASE_CONNECT_RETRIES: 60
+      DATABASE_CONNECT_RETRY_DELAY_MS: 3000
+      TYPEORM_MIGRATIONS_RUN: "true"
+      JWT_SECRET: your_jwt_secret_key
+      JWT_EXPIRES_IN: 1h
+      DEFAULT_USER_PASSWORD: aivacol
+      REDIS_ENABLED: "true"
+      REDIS_HOST: info_redis
+      REDIS_PORT: 6379
+      REDIS_TTL: 3600
+      APP_PORT: 3001
+      RABBITMQ_HOST: info_rabbitmq
+      MONGODB_URI: mongodb://info_mongodb:27017/audit_db
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+  # Volumes removed for production container to avoid hiding node_modules installed in image.
+  # During local development use a separate dev service that mounts the source directory.
+
+  # info_api_dev removido: use info_api para manter um unico container por servico
+
+  info_sqlserver:
+    container_name: info_sqlserver
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: YourStrong@Password
+    volumes:
+      - info_sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/1433'"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  info_redis:
+    container_name: info_redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - info_redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  info_rabbitmq:
+    container_name: info_rabbitmq
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+
+  info_mongodb:
+    container_name: info_mongodb
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - info_mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  info_prometheus:
+    image: prom/prometheus:latest
+    container_name: info_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+
+  info_grafana:
+    image: grafana/grafana:latest
+    container_name: info_grafana
+    ports:
+      - "3002:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_FORCE_PASSWORD_CHANGE: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - info_grafana_data:/var/lib/grafana
+    depends_on:
+      - info_prometheus
+    restart: unless-stopped
+
+  info_cadvisor:
+    container_name: info_cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    restart: unless-stopped
+
+  info_redis_exporter:
+    container_name: info_redis_exporter
+    image: oliver006/redis_exporter:v1.66.0
+    environment:
+      REDIS_ADDR: info_redis:6379
+    ports:
+      - "9121:9121"
+    depends_on:
+      info_redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  info_blackbox:
+    container_name: info_blackbox
+    image: prom/blackbox-exporter:v0.25.0
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    restart: unless-stopped
+
+  info_docs:
+    container_name: info_docs
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.vitepress
+    image: info_docs:latest
+    ports:
+      - "3003:4173"
+    restart: unless-stopped
+
+volumes:
+  info_sqlserver_data:
+  info_redis_data:
+  info_mongodb_data:
+  info_grafana_data:
