@@ -1,78 +1,37 @@
 # Branch Protection
 
-This repository uses three long-lived branches:
+Duas branches long-lived:
 
-- `main`: production and source of truth.
-- `staging`: validation and homologation.
-- `develop`: development integration.
+- **`main`**: produção e fonte da verdade.
+- **`develop`**: integração de features e fixes.
 
-Configure these rules in GitHub after creating the repository and branches.
-
-## Required Branches
-
-Create the branches in this order:
-
-1. `main`
-2. `staging`, from `main`
-3. `develop`, from `main`
+Fluxo completo documentado em [`CI_CD.md`](CI_CD.md).
 
 ## `main`
 
-Recommended protection rules:
+Regras recomendadas:
 
-- Require a pull request before merging.
-- Require at least 1 approval.
-- Dismiss stale pull request approvals when new commits are pushed.
-- Require status checks to pass before merging.
-- Require branches to be up to date before merging.
-- Require conversation resolution before merging.
-- Do not allow direct pushes.
-- Do not allow force pushes.
-- Do not allow deletions.
+- Exigir PR antes do merge (somente a partir de `develop`).
+- Exigir pelo menos 1 aprovação.
+- Exigir status checks antes do merge.
+- Exigir branches atualizadas antes do merge.
+- Não permitir push direto, force push ou exclusão.
 
-Required status checks:
+Status checks obrigatórios (pipeline [`ci.yml`](workflows/ci.yml)):
 
-- `Build and unit tests`
-- `Validation tests`
-- `Docker image build`
-
-## `staging`
-
-Recommended protection rules:
-
-- Require a pull request before merging.
-- Require at least 1 approval.
-- Require status checks to pass before merging.
-- Require branches to be up to date before merging.
-- Do not allow direct pushes.
-- Do not allow force pushes.
-- Do not allow deletions.
-
-Required status checks:
-
-- `Build and unit tests`
-- `Validation tests`
-- `Docker image build`
+- `Unit tests`
+- `E2E tests`
+- `Build documentation`
 
 ## `develop`
 
-Recommended protection rules:
+Regras recomendadas:
 
-- Require a pull request before merging.
-- Require status checks to pass before merging.
-- Do not allow force pushes.
-- Do not allow deletions.
+- Exigir PR antes do merge.
+- Não permitir force push ou exclusão.
+- CI/CD **não** roda aqui — a validação completa ocorre no PR `develop` → `main`.
 
-Required status checks:
+## Criação inicial das branches
 
-- `Build and unit tests`
-- `Docker image build`
-
-## Promotion Flow
-
-The promotion workflows create pull requests only after the previous branch CI succeeds:
-
-- `develop` -> `staging`: `.github/workflows/promote-develop-to-staging.yml`
-- `staging` -> `main`: `.github/workflows/promote-staging-to-main.yml`
-
-Keep automatic merge disabled for `staging` -> `main` unless the production process is fully mature and rollback is tested.
+1. `main` (padrão do repositório)
+2. `develop`, a partir de `main`
