@@ -77,7 +77,7 @@ Execução do agente `12-agente-guia-desenvolvedor.agent.md` — explicação do
 - `docs/dev-guide/index.md` — link e roteiro de estudo atualizado
 - `docs/.vitepress/config.mts` — sidebar com "Modulo Veiculos"
 
-## Reorganização da navegação para avaliador (2026-06-10)
+## Reorganização da navegação  (2026-06-10)
 
 Execução do agente `07-documentacao-vitepress.md` (versão remodelada).
 
@@ -85,7 +85,7 @@ Execução do agente `07-documentacao-vitepress.md` (versão remodelada).
 - Removidos do header e sidebar: Alterações, Guia, API, Arquitetura.
 - Sidebar unificada em todos os prefixos com ordem: Guia (1–6) → API → Arquitetura → Guia do Desenvolvedor (colapsado).
 - Criado `docs/getting-started/access.md` — checklist de pontos de acesso.
-- `docs/index.md` com roteiro numerado para o avaliador do teste técnico.
+- `docs/index.md` com roteiro numerado do teste técnico.
 - `installation.md` prioriza Docker Compose como caminho principal.
 
 ## Guia do Desenvolvedor — agente 12 e seção VitePress (2026-06-10)

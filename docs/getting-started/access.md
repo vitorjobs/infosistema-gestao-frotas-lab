@@ -1,6 +1,6 @@
 # 3. Pontos de Acesso
 
-Checklist para o avaliador verificar que o projeto completo está operacional.
+Checklist para verificar que o projeto completo está operacional.
 
 ## URLs dos serviços
 
@@ -40,7 +40,7 @@ curl -s -X POST http://localhost:3001/api/auth/login \
 curl -s http://localhost:3001/api/metrics | head -5
 ```
 
-## Checklist do avaliador
+## Checklist IMPORTANTE
 
 - [ ] `docker compose ps` mostra todos os containers em execução
 - [ ] Health retorna `200` com `database`, `info_redis` e `info_mongodb` como `up`

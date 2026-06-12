@@ -6,7 +6,7 @@ Backend da plataforma Aivacol de Gestão de Frota.
 
 | Camada | Tecnologia |
 |---|---|
-| Runtime | Node.js 18+ |
+| Runtime | Node.js 22+ |
 | Framework | NestJS 11 |
 | ORM | TypeORM |
 | Banco principal | SQL Server |
@@ -18,6 +18,18 @@ Backend da plataforma Aivacol de Gestão de Frota.
 | Documentação projeto | VitePress (`docs/`) |
 | Auditoria (opcional) | MongoDB |
 | Monitoramento | Terminus + Prometheus + Grafana |
+
+## Dependências externas
+
+| Serviço | Papel | Obrigatório |
+|---|---|---|
+| SQL Server | Persistência principal (TypeORM) | Sim, para CRUD e auth |
+| Redis | Cache de listagens | Opcional em dev (`USE_MEMORY_CACHE` / `start:dev`) |
+| MongoDB | Auditoria HTTP (`http_audit_logs`) | Opcional (`MONGODB_URI` / `AUDIT_ENABLED`) |
+| Prometheus / Grafana | Observabilidade | Opcional (stack Docker) |
+| RabbitMQ | Mensageria | Reservado (sem uso no código atual) |
+
+No Docker Compose, SQL Server, Redis e MongoDB sobem automaticamente. Fora do container, use `localhost` nos hosts do `.env` e suba a infra manualmente ou via subconjunto do Compose — veja [Executar o Projeto](/getting-started/installation).
 
 ## Estrutura `src/`
 

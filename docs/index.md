@@ -2,7 +2,7 @@
 
 Backend da plataforma Aivacol de Gestão de Frota — NestJS, TypeORM, SQL Server, JWT, Redis, Docker, Prometheus, Grafana e auditoria MongoDB.
 
-## Roteiro para o avaliador
+## Roteiro
 
 Siga a documentação nesta ordem (menu lateral):
 
@@ -19,6 +19,8 @@ Siga a documentação nesta ordem (menu lateral):
 
 ## Início rápido
 
+**Recomendado:** subir o projeto inteiro com Docker Compose para testes e avaliação.
+
 Na raiz do repositório:
 
 ```bash
@@ -28,6 +30,8 @@ docker compose ps
 ```
 
 Aguarde todos os containers ficarem em execução e acesse os [pontos de acesso](/getting-started/access).
+
+Execução local (`npm run start:dev` / `npm run start:prod`) é alternativa para desenvolvimento — exige SQL Server acessível e ajuste de hosts no `.env`. Consulte [Executar o Projeto](/getting-started/installation).
 
 ## Resumo de acessos
 

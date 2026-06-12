@@ -4,6 +4,8 @@
     "target": "es2020",
     "lib": ["es2020"],
     "moduleResolution": "node",
+    "rootDir": "./src",
+    "ignoreDeprecations": "6.0",
     "sourceMap": true,
     "outDir": "dist",
     "emitDecoratorMetadata": true,
