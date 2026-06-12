@@ -1,9 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { toPaginatedResult } from '../common/pagination';
 import { User } from './entities/usuario.entity';
 import { IUsersRepository } from './usuarios.repository.interface';
+
+const USER_PUBLIC_SELECT: FindOptionsSelect<User> = {
+  id: true,
+  nickname: true,
+  name: true,
+  email: true,
+  created_by: true,
+  created_at: true,
+  updated_at: true,
+};
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
@@ -17,7 +27,7 @@ export class UsersRepository implements IUsersRepository {
       order: { id: 'ASC' },
       skip: (page - 1) * limit,
       take: limit,
-      select: ['id', 'nickname', 'name', 'email', 'created_by', 'created_at', 'updated_at'],
+      select: USER_PUBLIC_SELECT,
     });
     return toPaginatedResult(items, total, page, limit);
   }
@@ -25,7 +35,7 @@ export class UsersRepository implements IUsersRepository {
   async findById(id: number): Promise<User | null> {
     return this.repo.findOne({
       where: { id },
-      select: ['id', 'nickname', 'name', 'email', 'created_by', 'created_at', 'updated_at'],
+      select: USER_PUBLIC_SELECT,
     });
   }
 }

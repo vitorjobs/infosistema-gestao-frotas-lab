@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
-import * as request from 'supertest';
+import request from 'supertest';
 import { Repository } from 'typeorm';
 import { User } from '../src/usuarios/entities/usuario.entity';
 import { TestAppModule } from './test-app.module';
