@@ -46,8 +46,22 @@ Passo a passo completo: [Executar o Projeto](https://vitorjobs.github.io/infosis
 
 ## Preview
 
+Capturas reais obtidas com o stack Docker Compose em execução local.
+
+### Swagger — Documentação REST API
+
+Interface interativa em `http://localhost:3001/api/docs`.
+
 ![Swagger — Documentação REST API](.github/img/swagger.png)
 
-## Imagens ilustrativas
+### Monitoramento — Grafana
 
-Captura real do Swagger após subir o stack com Docker Compose (`http://localhost:3001/api/docs`). Demais capturas (Grafana, VitePress) podem ser adicionadas em `.github/img/` conforme disponíveis.
+Dashboards provisionados em `http://localhost:3002` (métricas da API, infraestrutura e dependências).
+
+![Monitoramento — Grafana](.github/img/monitoramento.png)
+
+### Documentação — VitePress
+
+Site estático do projeto em `http://localhost:3003` (publicado em GitHub Pages após merge em `main`).
+
+![Documentação — VitePress](.github/img/vitepress.png)
